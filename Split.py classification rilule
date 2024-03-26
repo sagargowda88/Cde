@@ -1,0 +1,18 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+# Read the Excel files into DataFrames
+df1 = pd.read_excel('file1.xlsx')
+df2 = pd.read_excel('file2.xlsx')
+
+# Concatenate the DataFrames row-wise
+combined_df = pd.concat([df1, df2], ignore_index=True)
+
+# Shuffle the combined DataFrame
+shuffled_df = combined_df.sample(frac=1).reset_index(drop=True)
+
+# Define the ratio for train and test split
+train_ratio = 0.8  # 80% for training, 20% for testing
+
+# Split the shuffled DataFrame into train and test sets with shuffle enabled
+train_df, test_df = train_test_split(shuffled_df, test_size=(1 - train_ratio), shuffle=True, random_state=42)
