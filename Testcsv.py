@@ -9,8 +9,17 @@ all_false_rules = grouped_df[grouped_df['is_cde'].str.contains('False')]
 # Load the original dataset from the Excel file
 original_df = pd.read_excel("your_excel_file.xlsx")
 
-# Get the indices of rows where 'rule_id' is in 'all_false_rules'
+# Get the indices of rows where 'rule_id' is not in 'all_false_rules' (for train data)
+train_indices = original_df[~original_df['rule_id'].isin(all_false_rules['rule_id'])].index
+
+# Get the indices of rows where 'rule_id' is in 'all_false_rules' (for test data)
 test_indices = original_df[original_df['rule_id'].isin(all_false_rules['rule_id'])].index
+
+# Create the train DataFrame
+train_df = original_df.loc[train_indices]
+
+# Save the train DataFrame to train.csv
+train_df.to_csv('train.csv', index=False)
 
 # Create the test DataFrame
 test_df = original_df.loc[test_indices]
