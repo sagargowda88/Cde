@@ -1,28 +1,28 @@
- import pandas as pd
+import pandas as pd
 
 # Read the pre-grouped Excel file into a pandas DataFrame
 grouped_df = pd.read_excel("grouped_excel_file.xlsx")
 
-# Check if all 'is_cde' values are False for each 'rule_id'
-all_false_rules = grouped_df[grouped_df['is_cde'].str.contains('False')]
-
 # Load the original dataset from the Excel file
 original_df = pd.read_excel("your_excel_file.xlsx")
 
-# Get the indices of rows where 'rule_id' is not in 'all_false_rules' (for train data)
-train_indices = original_df[~original_df['rule_id'].isin(all_false_rules['rule_id'])].index
+# Merge original_df with grouped_df on 'rule_id' to add 'is_cde' column
+merged_df = pd.merge(original_df, grouped_df[['rule_id', 'is_cde']], on='rule_id')
 
-# Get the indices of rows where 'rule_id' is in 'all_false_rules' (for test data)
-test_indices = original_df[original_df['rule_id'].isin(all_false_rules['rule_id'])].index
+# Group by 'rule_id' and check if all 'is_cde' values are False
+all_false_rules = merged_df.groupby('rule_id')['is_cde'].apply(lambda x: all(val == 'False' for val in x))
 
-# Create the train DataFrame
-train_df = original_df.loc[train_indices]
+# Get the rule_ids where all 'is_cde' values are False
+all_false_rule_ids = all_false_rules[all_false_rules].index
 
-# Save the train DataFrame to train.csv
-train_df.to_csv('train.csv', index=False)
-
-# Create the test DataFrame
-test_df = original_df.loc[test_indices]
+# Filter original DataFrame to get rows where 'rule_id' is in 'all_false_rule_ids'
+test_df = original_df[original_df['rule_id'].isin(all_false_rule_ids)]
 
 # Save the test DataFrame to test.csv
 test_df.to_csv('test.csv', index=False)
+
+# Filter original DataFrame to get rows where 'rule_id' is not in 'all_false_rule_ids'
+train_df = original_df[~original_df['rule_id'].isin(all_false_rule_ids)]
+
+# Save the train DataFrame to train.csv
+train_df.to_csv('train.csv', index=False)
